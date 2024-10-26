@@ -1,0 +1,3 @@
+[submodule "user-configs"]
+	path = user-configs
+	url = git@github.com:tamasfaitli/user-configs.git
