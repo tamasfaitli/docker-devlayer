@@ -1,0 +1,55 @@
+
+services:
+
+  # development image for the development image :)
+  devenv-dev:
+    build:
+      # context: /home/tamasfaitli/Workspace/docker-ws/docker-devlayer
+      context: .
+      dockerfile: devlayer.dockerfile
+      args:
+        BASE_IMG: ubuntu:20.04
+    image: ubuntu20:tf-dev
+    container_name: devenv-dev
+    hostname: docker-devenv-dev
+    command: bash
+    stdin_open: true
+    tty: true
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_PTRACE
+    volumes:
+      - /home/tamasfaitli/Workspace/docker-ws/docker-devlayer/user-configs:/root/dotfiles
+      - /home/tamasfaitli/Workspace/docker-ws/docker-devlayer/test-code:/home/tamasfaitli/code
+
+  # an example project container
+  prj-template:
+    build:
+      context: .
+      dockerfile: devlayer.dockerfile
+      args:
+        # define the base image containing all project dependencies and OS version etc..
+        BASE_IMG: prj-image:latest
+    # name of the new image build using "docker compose build"
+    image: prj-image:td-dev
+    # name to refer when running "docker exec -it container_name bash"
+    container_name: prj-template-dev
+    # hostname inside the container to easily identify in which "machine" we are working with currently
+    hostname: docker-dev
+    # running bash and making interactive session
+    command: bash
+    stdin_open: true
+    tty: true
+    # following to was added for some debugger warnings inside the container
+    # https://stackoverflow.com/questions/35860527/warning-error-disabling-address-space-randomization-operation-not-permitted
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_PTRACE
+    # attached volumes, e.g. project folder for code editing, some data folders for running/testing
+    volumes:
+      # mount the folder with all the data to analyze
+      - /mnt/data/datasets:/home/data
+      # mount the folder with the source code for development
+      - /home/user/path-to-project:/home/prj

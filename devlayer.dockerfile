@@ -16,6 +16,7 @@ FROM $BASE_IMG
 # these are after the FROM command which resets arguments apparently
 ARG USER=tamasfaitli
 ARG SYSARCH=amd64 # probably not working with nvim but let's see if I ever run it on other than x86_64
+ARG FD_VER=10.2.0
 ARG FZF_VER=0.55.0
 ARG NVIM_VER=0.10.2
 
@@ -24,12 +25,20 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # Installing dependencies for editors and plugins
 RUN apt update && apt install -y \
-	wget tmux unzip git build-essential \
+	wget tmux unzip git build-essential bash-completion \
 	# requirements for neovim plugins and installations
-	ripgrep lua5.1 luarocks curl xclip python3
+	tree ripgrep lua5.1 luarocks curl xclip python3 python3-venv \
+	cmake
+
+# Some Mason downloads need npm (installing it without recommendations as not needed)
+RUN apt update && apt install -y --no-install-recommends npm
 
 # Setting up tools (not from apt..)
 WORKDIR /home/$USER/tmp
+
+# fd - simpler alternative to find (integrates well with fzf)
+RUN wget "https://github.com/sharkdp/fd/releases/download/v$FD_VER/fd_${FD_VER}_$SYSARCH.deb" \
+	&& dpkg --install fd_${FD_VER}_$SYSARCH.deb
 
 # fzf - fuzzy file finder
 RUN wget "https://github.com/junegunn/fzf/releases/download/v$FZF_VER/fzf-$FZF_VER-linux_$SYSARCH.tar.gz" \
@@ -46,10 +55,13 @@ RUN wget "https://github.com/neovim/neovim/releases/download/v0.10.2/nvim-linux6
 # TODO : update how config is handled here
 # final approach will be:
 # - clone from personal git repo, and copy files to the proper place
-COPY test-cfg/nvim /root/.config/nvim
+#COPY test-cfg/nvim /root/.config/nvim
+# TODO Change this command once above todo is resolved
+RUN echo "source /root/dotfiles/.bashrc-docker" >> ~/.bashrc
+
 
 # running the nvim package manager from cli
-RUN nvim --headless "+Lazy! sync" +qa
+#RUN nvim --headless "+Lazy! sync" +qa
 
 # setting the final workdir for the image
 WORKDIR /home/$USER
