@@ -15,7 +15,9 @@ FROM $BASE_IMG
 
 # these are after the FROM command which resets arguments apparently
 ARG USER=tamasfaitli
-ARG SYSARCH=amd64 # probably not working with nvim but let's see if I ever run it on other than x86_64
+# probably not working with nvim but let's see if I ever run it on other
+# than x86_64
+ARG SYSARCH=amd64
 ARG FD_VER=10.2.0
 ARG FZF_VER=0.55.0
 ARG NVIM_VER=0.10.2
@@ -28,10 +30,17 @@ RUN apt update && apt install -y \
 	wget tmux unzip git build-essential bash-completion \
 	# requirements for neovim plugins and installations
 	tree ripgrep lua5.1 luarocks curl xclip python3 python3-venv \
-	cmake
+	cmake python3-pip
 
-# Some Mason downloads need npm (installing it without recommendations as not needed)
-RUN apt update && apt install -y --no-install-recommends npm
+# This might not be necessary for everyone, should figure out how to get the
+# one installed by Mason used within the setup and not adding it here
+RUN pip3 install debugpy
+
+# Some Mason downloads need npm (installing it without recommendations as
+# not needed)
+RUN apt update && apt install \
+        -y --no-install-recommends --no-install-suggests \
+        npm
 
 # Setting up tools (not from apt..)
 WORKDIR /home/$USER/tmp
@@ -51,17 +60,16 @@ RUN wget "https://github.com/neovim/neovim/releases/download/v0.10.2/nvim-linux6
 	&& mv nvim-linux64 /opt/ \
 	&& printf "vi\nvim\nnvim" | xargs -I {} ln -s /opt/nvim-linux64/bin/nvim /usr/bin/{}
 
-# parsing neovim config
-# TODO : update how config is handled here
-# final approach will be:
-# - clone from personal git repo, and copy files to the proper place
-#COPY test-cfg/nvim /root/.config/nvim
-# TODO Change this command once above todo is resolved
-RUN echo "source /root/dotfiles/.bashrc-docker" >> ~/.bashrc
+# Copying neovim config (that is added as submodule to this repo)
+# adapt as needed
+COPY user-configs/. /root/
+# don't want to overwrite whole bashrc from custom config, have an extension
+# only for docker that is added to the existing one
+RUN echo "source /root/.bashrc-docker" >> ~/.bashrc
 
 
 # running the nvim package manager from cli
-#RUN nvim --headless "+Lazy! sync" +qa
+RUN nvim --headless "+Lazy! sync" +qa
 
 # setting the final workdir for the image
 WORKDIR /home/$USER

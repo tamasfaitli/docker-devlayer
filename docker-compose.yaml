@@ -24,19 +24,19 @@ services:
       - /home/tamasfaitli/Workspace/docker-ws/docker-devlayer/test-code:/home/tamasfaitli/code
 
   # an example project container
-  prj-template:
+  tools-ouster-rosbag:
     build:
       context: .
       dockerfile: devlayer.dockerfile
       args:
         # define the base image containing all project dependencies and OS version etc..
-        BASE_IMG: prj-image:latest
+        BASE_IMG: tools-ouster-rosbag:latest
     # name of the new image build using "docker compose build"
-    image: prj-image:td-dev
+    image: tools-ouster-rosbag:td-dev
     # name to refer when running "docker exec -it container_name bash"
-    container_name: prj-template-dev
+    container_name: tools-ouster-rosbag-dev
     # hostname inside the container to easily identify in which "machine" we are working with currently
-    hostname: docker-dev
+    hostname: docker-osbag-dev
     # running bash and making interactive session
     command: bash
     stdin_open: true
@@ -50,6 +50,7 @@ services:
     # attached volumes, e.g. project folder for code editing, some data folders for running/testing
     volumes:
       # mount the folder with all the data to analyze
-      - /mnt/data/datasets:/home/data
+      - /mnt/data/datasets:/home/tamasfaitli/data
       # mount the folder with the source code for development
-      - /home/user/path-to-project:/home/prj
+      - /home/tamasfaitli/Workspace/c++-packages/tools-ouster-rosbag:/home/tamasfaitli/prj
+
