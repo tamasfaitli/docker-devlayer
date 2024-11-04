@@ -1,4 +1,4 @@
-################################################################################
+
 # Author: Tamas Faitli
 # Date: 25/10/2024
 # Description:
@@ -70,6 +70,10 @@ RUN echo "source /root/.bashrc-docker" >> ~/.bashrc
 
 # running the nvim package manager from cli
 RUN nvim --headless "+Lazy! sync" +qa
+RUN nvim --headless "+Lazy! update" +qa
+# For this one, need to add MasonInstallAll custom command into nvim configs
+# see https://github.com/williamboman/mason.nvim/issues/467
+RUN nvim --headless -c "MasonInstallAll" -c "qa"
 
 # setting the final workdir for the image
 WORKDIR /home/$USER
